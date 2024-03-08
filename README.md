@@ -1,3 +1,4 @@
+<!--
 ---
 layout: page-fullwidth
 order: 2
@@ -11,6 +12,7 @@ lesson: true
 header:
  image_fullwidth: "amrex_warpx-fs8.png"
 ---
+-->
 
 <br>
 
