@@ -14,6 +14,10 @@ header:
 ---
 -->
 
+---
+use_math = true
+---
+
 <br>
 
 {:refdef: style="text-align: center;"}
