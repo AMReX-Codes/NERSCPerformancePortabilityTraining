@@ -45,25 +45,20 @@ header:
 ## Setup Instructions For AMReX Tutorials
 
 
-1. Log into the Theta login node with your username (replace "elvis"):
+1. Log into the Perlmutter login node with your username (replace "elvis"):
 ```shell
-ssh -A elvis@theta.alcf.anl.gov
+ssh elvis@perlmutter.nersc.gov
 ```
 
-2. In your home folder, create a local copy of the track 5 numerical examples:
+2. In your scratch folder, create a local copy of the examples:
 ```shell
-cd ~
-rsync -a /eagle/ATPESC2023/EXAMPLES/track-5-numerical .
+cd $PSCRATCH
+rsync -a /global/cfs/cdirs/training/2024/amrex_mar2024 .
 ```
 
-3. To access ThetaGPU resources, transfer to a GPU service node:
+4. Request a single-gpu interactive job, skip the reservation option after the training ends:
 ```shell
-ssh thetagpusn1 # or thetagpusn2
-```
-
-4. From the GPU service node, request a single-gpu reservation:
-```shell
-qsub --attrs=filesystems=home,eagle -I -q single-gpu -t 60 -n 1 -A ATPESC2023
+salloc -q shared -A ntrain9 --reservation=amrex_mar2024 -N 1 -c 32 -t 00:45:00 -C gpu -G 1
 ```
 
 5. Load OpenMPI:
@@ -73,7 +68,7 @@ module load openmpi/openmpi-4.1.4_ucx-1.14.0_gcc-9.4.0_cuda-11.8
 
 6. Change to the AMReX examples directory:
 ```shell
-cd track-5-numerical/amrex
+cd amrex_mar2024
 ```
 
 7. Setup several environment variables and path by
