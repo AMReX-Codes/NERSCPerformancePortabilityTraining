@@ -56,26 +56,30 @@ cd $PSCRATCH
 rsync -a /global/cfs/cdirs/training/2024/amrex_mar2024 .
 ```
 
-4. Request a single-gpu interactive job, skip the reservation option after the training ends:
+3. Request a single-gpu interactive job, skip the reservation option after the training ends:
 ```shell
-salloc -q shared -A ntrain9 --reservation=amrex_mar2024 -N 1 -c 32 -t 00:45:00 -C gpu -G 1
+salloc -q shared_interactive -A ntrain9 --reservation=amrex_mar2024 -N 1 -c 32 -t 00:45:00 -C gpu -G 1
 ```
 
-5. Load OpenMPI:
-```shell
-module load openmpi/openmpi-4.1.4_ucx-1.14.0_gcc-9.4.0_cuda-11.8
-```
-
-6. Change to the AMReX examples directory:
+4. Change to the AMReX examples directory:
 ```shell
 cd amrex_mar2024
 ```
 
+<!---
+5. Load OpenMPI:
+```shell
+module load openmpi/openmpi-4.1.4_ucx-1.14.0_gcc-9.4.0_cuda-11.8
+```
 7. Setup several environment variables and path by
 sourcing the `env_setup_amrex.sh` script:
 ```shell
 source env_setup_amrex.sh
 ```
+--->
+
+
+
 
 
 
@@ -248,27 +252,36 @@ AmrCoreAdv::MakeNewLevelFromCoarse (int lev, Real time, const BoxArray& ba,
 To run the code navigate to the directory with your copy of the AMReX examples.
 
 ```shell
-cd {{site.handson_root}}/amrex/AMReX_Amr101/Exec
+cd $PSCRATCH/amrex_mar2024
+cd AMReX_Amr101
 ```
 
 In this directory you'll see:
 
 ```shell
-main3d.gnu.MPI.ex -- the 3D executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex -- the 3D executable built with MPI
 
-inputs -- a file specifying simulation parameters
+main3d.gnu.MPI.CUDA.ex -- the 3D executable built with MPI and CUDA
+
+inputs, inputs_for_scaling -- input files specifying simulation parameters
 ```
 
 To run in serial:
 
 ```shell
-./main3d.gnu.MPI.ex inputs
+./main3d.gnu.x86-milan.MPI.ex inputs_for_scaling
 ```
 
-To run in parallel, for example on 4 ranks:
+To run in parallel, for example on 16 ranks:
 
 ```shell
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs
+srun -n 16 -c 2 ./main3d.gnu.x86-milan.MPI.ex inputs_for_scaling
+```
+Note how the simulation time changes.
+To run on the GPU:
+
+```shell
+srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs_for_scaling
 ```
 
 
