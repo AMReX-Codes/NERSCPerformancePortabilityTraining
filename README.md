@@ -982,13 +982,15 @@ Your goal here is to see if you can cover the floor of the pachinko machine.
 
 The code is located in your copy of the AMReX examples at:
 ```
-cd {{site.handson_root}}/amrex/AMReX_EB_Pachinko
+cd AMReX_EB_Pachinko
 ```
 
 In this directory you'll see
 
 ```
-main3d.gnu.MPI.ex    -- the executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex    -- the executable -- this has been built with MPI
+
+main3d.gnu.MPI.CUDA.ex   -- the executable built with MPI and CUDA support
 
 inputs_3d            -- domain size, size of grids, how many time steps, which obstacles...
 
@@ -1009,13 +1011,13 @@ initial_particles_3d file.
 To run in serial,
 
 ```
-./main3d.gnu.MPI.ex inputs_3d
+./main3d.gnu.x86-milan.MPI.ex inputs_3d
 ```
 
 To run in parallel, for example on 4 ranks:
 
 ```
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs_3d
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d 
 ```
 
 The following parameters can be set at run-time -- these are currently set in the inputs_3d file.
@@ -1037,7 +1039,7 @@ max_steps = 100000                    # the maximum number of steps (if max_step
 
 You can also set values on the command line; for example,
 ```
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs_3d particle_file=my_file
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d particle_file=my_file
 ```
 
 will read the particles from a file called "my_file"
@@ -1073,7 +1075,7 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_EB_Pachinko/pachinko\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_EB_Pachinko/pachinko\* .
 ```
 
 If you're interested in generating the movies manually, see the details below.
