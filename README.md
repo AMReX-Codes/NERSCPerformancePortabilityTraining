@@ -263,25 +263,27 @@ main3d.gnu.x86-milan.MPI.ex -- the 3D executable built with MPI
 
 main3d.gnu.MPI.CUDA.ex -- the 3D executable built with MPI and CUDA
 
-inputs, inputs_for_scaling -- input files specifying simulation parameters
+inputs -- input file specifying simulation parameters
+
+inputs_for_scaling -- modified to test performance, with less time steps and a larger problem size
 ```
 
 To run in serial:
 
 ```shell
-./main3d.gnu.x86-milan.MPI.ex inputs_for_scaling
+./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
 To run in parallel, for example on 16 ranks:
 
 ```shell
-srun -n 16 -c 2 ./main3d.gnu.x86-milan.MPI.ex inputs_for_scaling
+srun -n 16 -c 2 ./main3d.gnu.x86-milan.MPI.ex inputs
 ```
-Note how the simulation time changes.
+
 To run on the GPU:
 
 ```shell
-srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs_for_scaling
+srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 
@@ -339,6 +341,7 @@ to render the AMReX plotfiles. [FFmpeg](https://ffmpeg.org/) is then used to sti
 and gif. To generate a movie from the plotfiles type:
 
 ```
+module load paraview
 pvbatch paraview_amr101.py
 ```
 
@@ -347,7 +350,7 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_Amr101/Exec/amr101_3D\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_Amr101/amr101_3D\* .
 ```
 
 Escaping the wildcard with `\` is necessary on some shells.
@@ -526,7 +529,7 @@ will be done on the GPU. AMReX functionality is flexible enough that this can
 be adapted for NVidia, AMD, or Intel GPUs _without code changes_.
 
 
-For convenience, there is a binary pre-compiled with CUDA support in the `AMReX_Amr101/Exec`
+For convenience, there is a binary pre-compiled with CUDA support in the `AMReX_Amr101`
 folder, `./main3d.gnu.CUDA.MPI.ex`. If one wanted to compile the source code with CUDA,
 the command would be:
 
@@ -771,27 +774,36 @@ advection.
 To run the code navigate to the directory with your copy of the AMReX examples.
 
 ```shell
-cd {{site.handson_root}}/amrex/AMReX_Amr102/Exec
+cd $PSCRATCH/amrex_mar2024
+cd AMReX_Amr102
 ```
 
 In this directory you'll see
 
 ```shell
-main3d.gnu.MPI.ex -- the 3D executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex -- the 3D executable built with MPI
 
-inputs -- an inputs file
+main3d.gnu.MPI.CUDA.ex -- the 3D executable built with MPI and CUDA
+
+inputs -- input file specifying simulation parameters
 ```
 
 As before, to run the 3D code in serial:
 
 ```shell
-./main3d.gnu.MPI.ex inputs
+./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
 To run in parallel, for example on 4 ranks:
 
 ```shell
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs
+```
+
+To run on the GPU:
+
+```shell
+srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 Similar to the last example, the following parameters can be set at run-time -- these are currently set in the inputs file.
@@ -863,6 +875,7 @@ to render the AMReX plotfiles into a movie
 and gif. To generate a movie from the plotfiles type:
 
 ```
+module load paraview
 pvbatch paraview_amr102.py
 ```
 
@@ -871,15 +884,15 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_Amr102/Exec/amr102_3D\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_Amr102/amr102_3D\* .
 ```
 
 Notes:
 
 - To delete old plotfiles before a new run, do `rm -rf plt*`
 
-- You can do `realpath amr102_3D.gif` to get the movie's path on ThetaGPU and then copy it to your local
-  machine by doing `scp [username]@theta.alcf.anl.gov:[path-to-gif] .`
+- You can do `realpath amr102_3D.gif` to get the movie's path on Perlmutter and then copy it to your local
+  machine by doing `scp [username]@perlmutter.nersc.gov:[path-to-gif] .`
 
 
 If you're interested in generating the movies manually, see the details below.
