@@ -45,42 +45,41 @@ header:
 ## Setup Instructions For AMReX Tutorials
 
 
-1. Log into the Theta login node with your username (replace "elvis"):
+1. Log into the Perlmutter login node with your username (replace "elvis"):
 ```shell
-ssh -A elvis@theta.alcf.anl.gov
+ssh elvis@perlmutter.nersc.gov
 ```
 
-2. In your home folder, create a local copy of the track 5 numerical examples:
+2. In your scratch folder, create a local copy of the examples:
 ```shell
-cd ~
-rsync -a /eagle/ATPESC2023/EXAMPLES/track-5-numerical .
+cd $PSCRATCH
+rsync -a /global/cfs/cdirs/training/2024/amrex_mar2024 .
 ```
 
-3. To access ThetaGPU resources, transfer to a GPU service node:
+3. Request a single-gpu interactive job, skip the reservation option after the training ends:
 ```shell
-ssh thetagpusn1 # or thetagpusn2
+salloc -q shared_interactive -A ntrain9 --reservation=amrex_mar2024 -N 1 -c 32 -t 00:45:00 -C gpu -G 1
 ```
 
-4. From the GPU service node, request a single-gpu reservation:
+4. Change to the AMReX examples directory:
 ```shell
-qsub --attrs=filesystems=home,eagle -I -q single-gpu -t 60 -n 1 -A ATPESC2023
+cd amrex_mar2024
 ```
 
+<!---
 5. Load OpenMPI:
 ```shell
 module load openmpi/openmpi-4.1.4_ucx-1.14.0_gcc-9.4.0_cuda-11.8
 ```
-
-6. Change to the AMReX examples directory:
-```shell
-cd track-5-numerical/amrex
-```
-
 7. Setup several environment variables and path by
 sourcing the `env_setup_amrex.sh` script:
 ```shell
 source env_setup_amrex.sh
 ```
+--->
+
+
+
 
 
 
@@ -253,27 +252,38 @@ AmrCoreAdv::MakeNewLevelFromCoarse (int lev, Real time, const BoxArray& ba,
 To run the code navigate to the directory with your copy of the AMReX examples.
 
 ```shell
-cd {{site.handson_root}}/amrex/AMReX_Amr101/Exec
+cd $PSCRATCH/amrex_mar2024
+cd AMReX_Amr101
 ```
 
 In this directory you'll see:
 
 ```shell
-main3d.gnu.MPI.ex -- the 3D executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex -- the 3D executable built with MPI
 
-inputs -- a file specifying simulation parameters
+main3d.gnu.MPI.CUDA.ex -- the 3D executable built with MPI and CUDA
+
+inputs -- input file specifying simulation parameters
+
+inputs_for_scaling -- modified to test performance, with less time steps and a larger problem size
 ```
 
 To run in serial:
 
 ```shell
-./main3d.gnu.MPI.ex inputs
+./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
-To run in parallel, for example on 4 ranks:
+To run in parallel, for example on 16 ranks:
 
 ```shell
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs
+srun -n 16 -c 2 ./main3d.gnu.x86-milan.MPI.ex inputs
+```
+
+To run on the GPU:
+
+```shell
+srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 
@@ -331,6 +341,7 @@ to render the AMReX plotfiles. [FFmpeg](https://ffmpeg.org/) is then used to sti
 and gif. To generate a movie from the plotfiles type:
 
 ```
+module load paraview
 pvbatch paraview_amr101.py
 ```
 
@@ -339,7 +350,7 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_Amr101/Exec/amr101_3D\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_Amr101/amr101_3D\* .
 ```
 
 Escaping the wildcard with `\` is necessary on some shells.
@@ -518,7 +529,7 @@ will be done on the GPU. AMReX functionality is flexible enough that this can
 be adapted for NVidia, AMD, or Intel GPUs _without code changes_.
 
 
-For convenience, there is a binary pre-compiled with CUDA support in the `AMReX_Amr101/Exec`
+For convenience, there is a binary pre-compiled with CUDA support in the `AMReX_Amr101`
 folder, `./main3d.gnu.CUDA.MPI.ex`. If one wanted to compile the source code with CUDA,
 the command would be:
 
@@ -763,27 +774,36 @@ advection.
 To run the code navigate to the directory with your copy of the AMReX examples.
 
 ```shell
-cd {{site.handson_root}}/amrex/AMReX_Amr102/Exec
+cd $PSCRATCH/amrex_mar2024
+cd AMReX_Amr102
 ```
 
 In this directory you'll see
 
 ```shell
-main3d.gnu.MPI.ex -- the 3D executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex -- the 3D executable built with MPI
 
-inputs -- an inputs file
+main3d.gnu.MPI.CUDA.ex -- the 3D executable built with MPI and CUDA
+
+inputs -- input file specifying simulation parameters
 ```
 
 As before, to run the 3D code in serial:
 
 ```shell
-./main3d.gnu.MPI.ex inputs
+./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
 To run in parallel, for example on 4 ranks:
 
 ```shell
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs
+```
+
+To run on the GPU:
+
+```shell
+srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 Similar to the last example, the following parameters can be set at run-time -- these are currently set in the inputs file.
@@ -855,6 +875,7 @@ to render the AMReX plotfiles into a movie
 and gif. To generate a movie from the plotfiles type:
 
 ```
+module load paraview
 pvbatch paraview_amr102.py
 ```
 
@@ -863,15 +884,15 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_Amr102/Exec/amr102_3D\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_Amr102/amr102_3D\* .
 ```
 
 Notes:
 
 - To delete old plotfiles before a new run, do `rm -rf plt*`
 
-- You can do `realpath amr102_3D.gif` to get the movie's path on ThetaGPU and then copy it to your local
-  machine by doing `scp [username]@theta.alcf.anl.gov:[path-to-gif] .`
+- You can do `realpath amr102_3D.gif` to get the movie's path on Perlmutter and then copy it to your local
+  machine by doing `scp [username]@perlmutter.nersc.gov:[path-to-gif] .`
 
 
 If you're interested in generating the movies manually, see the details below.
@@ -961,13 +982,15 @@ Your goal here is to see if you can cover the floor of the pachinko machine.
 
 The code is located in your copy of the AMReX examples at:
 ```
-cd {{site.handson_root}}/amrex/AMReX_EB_Pachinko
+cd AMReX_EB_Pachinko
 ```
 
 In this directory you'll see
 
 ```
-main3d.gnu.MPI.ex    -- the executable -- this has been built with MPI
+main3d.gnu.x86-milan.MPI.ex    -- the executable -- this has been built with MPI
+
+main3d.gnu.MPI.CUDA.ex   -- the executable built with MPI and CUDA support
 
 inputs_3d            -- domain size, size of grids, how many time steps, which obstacles...
 
@@ -988,13 +1011,13 @@ initial_particles_3d file.
 To run in serial,
 
 ```
-./main3d.gnu.MPI.ex inputs_3d
+./main3d.gnu.x86-milan.MPI.ex inputs_3d
 ```
 
 To run in parallel, for example on 4 ranks:
 
 ```
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs_3d
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d 
 ```
 
 The following parameters can be set at run-time -- these are currently set in the inputs_3d file.
@@ -1016,7 +1039,7 @@ max_steps = 100000                    # the maximum number of steps (if max_step
 
 You can also set values on the command line; for example,
 ```
-mpiexec -n 4 ./main3d.gnu.MPI.ex inputs_3d particle_file=my_file
+srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d particle_file=my_file
 ```
 
 will read the particles from a file called "my_file"
@@ -1052,7 +1075,7 @@ To view the files you can copy them to your local machine and view
 them with scp. Open a terminal on your local machine and move the folder where you want
 to download the mp4 and gif. Then type:
 ```shell
-scp elvis@theta.alcf.anl.gov:~/track-5-numerical/amrex/AMReX_EB_Pachinko/pachinko\* .
+scp elvis@perlmutter.nersc.gov:</path/to/scratch/dir/>amrex_mar2024/AMReX_EB_Pachinko/pachinko\* .
 ```
 
 If you're interested in generating the movies manually, see the details below.
