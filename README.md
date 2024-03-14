@@ -56,7 +56,9 @@ cd $PSCRATCH
 rsync -a /global/cfs/cdirs/training/2024/amrex_mar2024 .
 ```
 
-3. Request a single-gpu interactive job, skip the reservation option after the training ends:
+3. Request a single-gpu interactive job:
+
+   (After the training, remove the reservation option and use your own project instead of `ntrain9`.)
 ```shell
 salloc -q shared_interactive -A ntrain9 --reservation=amrex_mar2024 -N 1 -c 32 -t 00:45:00 -C gpu -G 1
 ```
@@ -277,13 +279,13 @@ To run in serial:
 To run in parallel, for example on 16 ranks:
 
 ```shell
-srun -n 16 -c 2 ./main3d.gnu.x86-milan.MPI.ex inputs
+srun -n 16 -c 2 --cpu-bind=cores ./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
 To run on the GPU:
 
 ```shell
-srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
+srun -n 1 -c 32 --cpu-bind=cores --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 
@@ -797,13 +799,13 @@ As before, to run the 3D code in serial:
 To run in parallel, for example on 4 ranks:
 
 ```shell
-srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs
+srun -n 4 -c 8 --cpu-bind=cores ./main3d.gnu.x86-milan.MPI.ex inputs
 ```
 
 To run on the GPU:
 
 ```shell
-srun -n 1 -c 32 --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
+srun -n 1 -c 32 --cpu-bind=cores --gpus-per-task=1 ./main3d.gnu.MPI.CUDA.ex inputs
 ```
 
 Similar to the last example, the following parameters can be set at run-time -- these are currently set in the inputs file.
@@ -1017,7 +1019,7 @@ To run in serial,
 To run in parallel, for example on 4 ranks:
 
 ```
-srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d 
+srun -n 4 -c 8 --cpu-bind=cores ./main3d.gnu.x86-milan.MPI.ex inputs_3d 
 ```
 
 The following parameters can be set at run-time -- these are currently set in the inputs_3d file.
@@ -1039,7 +1041,7 @@ max_steps = 100000                    # the maximum number of steps (if max_step
 
 You can also set values on the command line; for example,
 ```
-srun -n 4 -c 8 ./main3d.gnu.x86-milan.MPI.ex inputs_3d particle_file=my_file
+srun -n 4 -c 8 --cpu-bind=cores ./main3d.gnu.x86-milan.MPI.ex inputs_3d particle_file=my_file
 ```
 
 will read the particles from a file called "my_file"
